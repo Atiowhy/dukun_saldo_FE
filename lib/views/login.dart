@@ -1,6 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
+  static const String routeName = "/login";
   const Login({super.key});
 
   @override
@@ -8,6 +10,8 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,104 +86,140 @@ class _LoginState extends State<Login> {
                     Container(
                       padding: EdgeInsets.all(20),
 
-                      child: Column(
-                        // mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // SizedBox(height: 10),
-                          Text("Email"),
-                          SizedBox(height: 10),
-                          TextFormField(
-                            decoration: InputDecoration(
-                              filled: true,
-                              labelText: "Email",
-                              prefixIcon: Icon(Icons.email_outlined),
-                              hintText: "Masukkan Email",
-                              fillColor: Color(0x0ff8f9fa),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          // mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // SizedBox(height: 10),
+                            Text("Email"),
+                            SizedBox(height: 10),
+                            TextFormField(
+                              decoration: InputDecoration(
+                                filled: true,
+                                labelText: "Email",
+                                prefixIcon: Icon(Icons.email_outlined),
+                                hintText: "Masukkan Email",
+                                fillColor: Color(0x0ff8f9fa),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Email tidak boleh kosong";
+                                } else if (!value.contains('@')) {
+                                  return "Format email tidak valid";
+                                }
+                                return null;
+                              },
+                            ),
+                            SizedBox(height: 10),
+                            Text("Password"),
+                            SizedBox(height: 10),
+                            TextFormField(
+                              decoration: InputDecoration(
+                                filled: true,
+                                labelText: "Password",
+                                hintText: "Masukkan Password",
+                                prefixIcon: Icon(Icons.lock_outline),
+                                fillColor: Color(0x0ff8f9fa),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Password tidak boleh kosong";
+                                } else if (value.length < 6) {
+                                  return "Password terlalu singkat";
+                                }
+                                return null;
+                              },
+                            ),
+                            SizedBox(height: 24),
+
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xff041627),
+                                  foregroundColor: Colors.white,
+                                ),
+                                icon: Icon(Icons.login),
+
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text("Berhasil"),
+                                          content: Text("Anda Berhasil Login"),
+                                        );
+                                      },
+                                    );
+                                  }
+                                },
+                                label: Text(
+                                  "Masuk",
+                                  style: TextStyle(fontSize: 20),
+                                ),
                               ),
                             ),
-                          ),
-                          SizedBox(height: 10),
-                          Text("Password"),
-                          SizedBox(height: 10),
-                          TextFormField(
-                            decoration: InputDecoration(
-                              filled: true,
-                              labelText: "Password",
-                              hintText: "Masukkan Password",
-                              prefixIcon: Icon(Icons.lock_outline),
-                              fillColor: Color(0x0ff8f9fa),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
+
+                            Container(
+                              margin: EdgeInsets.only(top: 24, bottom: 24),
+                              child: Center(
+                                child: Text(
+                                  "Atau Masuk Dengan",
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ),
-                          ),
-                          SizedBox(height: 24),
-
-                          SizedBox(
-                            width: double.infinity,
-                            height: 52,
-
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xff041627),
-                                foregroundColor: Colors.white,
-                              ),
-                              icon: Icon(Icons.login),
-
-                              onPressed: () {},
-                              label: Text(
-                                "Masuk",
-                                style: TextStyle(fontSize: 20),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 42,
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xffedeeef),
+                                  foregroundColor: Color(0xff191C1D),
+                                ),
+                                onPressed: () {},
+                                label: Text("Google"),
+                                icon: Icon(Icons.login),
                               ),
                             ),
-                          ),
 
-                          Container(
-                            margin: EdgeInsets.only(top: 24, bottom: 24),
-                            child: Center(
-                              child: Text(
-                                "Atau Masuk Dengan",
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 42,
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xffedeeef),
-                                foregroundColor: Color(0xff191C1D),
-                              ),
-                              onPressed: () {},
-                              label: Text("Google"),
-                              icon: Icon(Icons.login),
-                            ),
-                          ),
+                            SizedBox(height: 24),
 
-                          SizedBox(height: 24),
-
-                          Center(
-                            child: Text.rich(
-                              TextSpan(
-                                text: "Belum Punya Akun?",
-                                style: TextStyle(color: Color(0xff44474C)),
-                                children: [
-                                  TextSpan(
-                                    text: "Daftar",
-                                    style: TextStyle(
-                                      color: Color(0xff041627),
-                                      fontWeight: FontWeight.w400,
+                            Center(
+                              child: Text.rich(
+                                TextSpan(
+                                  text: "Belum Punya Akun?",
+                                  style: TextStyle(color: Color(0xff44474C)),
+                                  children: [
+                                    TextSpan(
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () => Navigator.pushNamed(
+                                          context,
+                                          '/register',
+                                        ),
+                                      text: "Daftar",
+                                      style: TextStyle(
+                                        color: Color(0xff041627),
+                                        fontWeight: FontWeight.w400,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],

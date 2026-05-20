@@ -1,3 +1,4 @@
+import 'package:dukun_saldo/views/login.dart';
 import 'package:dukun_saldo/views/register.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Dukun Saldo',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -31,7 +32,14 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: Register(),
+
+      // home: Register(),
+      initialRoute: Login.routeName,
+
+      routes: {
+        Login.routeName: (context) => const Login(),
+        Register.routeName: (context) => const Register(),
+      },
     );
   }
 }
