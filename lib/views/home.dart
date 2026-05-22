@@ -1,4 +1,3 @@
-import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,16 +14,28 @@ class _HomePageState extends State<HomePage> {
   String? selectedDropdown;
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
-  final _pageController = PageController(initialPage: 0);
+  // final _pageController = PageController(initialPage: 0);
+  // final _notchController = NotchBottomBarController(index: 0);
+  int _selectedIndex = 0;
 
-  final _notchController = NotchBottomBarController(index: 0);
+  static const List<Widget> _widgetOptions = <Widget>[
+    Text('Index 0: Home'),
+    Text('Index 1: Cart'),
+    Text('Index 2: Profile'),
+  ];
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    _notchController.dispose();
-    super.dispose();
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
+
+  // @override
+  // void dispose() {
+  //   _pageController.dispose();
+  //   _notchController.dispose();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -315,7 +326,24 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
+          Center(child: _widgetOptions.elementAt(_selectedIndex)),
         ], // Penutup Column Body
+      ),
+
+      bottomNavigationBar: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Advisor"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "Recomendation",
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        unselectedItemColor: Colors.white,
+        selectedItemColor: const Color(0xff6BFB9A),
+        onTap: _onItemTapped,
+        backgroundColor: Color(0xff0D1C2D),
       ),
     );
   }
