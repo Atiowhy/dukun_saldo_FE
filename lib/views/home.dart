@@ -119,7 +119,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // ... Kode Dropdown kamu sebelumnya (tetap dipertahankan) ...
           Padding(
             padding: const EdgeInsets.all(24),
             child: Row(
@@ -142,7 +141,7 @@ class _HomePageState extends State<HomePage> {
                       selectedDropdown = value;
                     });
                   },
-                  // Tambahan agar warna teks dropdown menyesuaikan tema
+
                   dropdownColor: isOn ? Color(0xff1A2B3C) : Colors.white,
                   style: TextStyle(
                     color: isOn ? Color(0xff6BFB9A) : Color(0xff041627),
@@ -157,7 +156,6 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Baris Pilih Tanggal
                 Row(
                   children: [
                     ElevatedButton.icon(
@@ -186,7 +184,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    // Teks untuk menampilkan tanggal yang dipilih
+
                     Expanded(
                       child: Text(
                         selectedDate != null
@@ -202,10 +200,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
 
-                const SizedBox(
-                  height: 16,
-                ), // Jarak antara tombol tanggal dan waktu
-                // 2. Baris Pilih Waktu
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     ElevatedButton.icon(
@@ -232,13 +227,11 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    // Teks untuk menampilkan waktu yang dipilih
+
                     Expanded(
                       child: Text(
                         selectedTime != null
-                            ? selectedTime!.format(
-                                context,
-                              ) // Format waktu otomatis sesuai AM/PM atau 24H perangkat
+                            ? selectedTime!.format(context)
                             : "Waktu belum dipilih",
                         style: TextStyle(
                           color: isOn
