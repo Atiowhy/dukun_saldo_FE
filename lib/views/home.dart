@@ -17,12 +17,10 @@ class _HomePageState extends State<HomePage> {
   TimeOfDay? selectedTime;
   final _pageController = PageController(initialPage: 0);
 
-  // 2. Buat NotchBottomBarController untuk mengatur animasi bottom bar (INI YANG KURANG)
   final _notchController = NotchBottomBarController(index: 0);
 
   @override
   void dispose() {
-    // Jangan lupa di-dispose supaya tidak memory leak
     _pageController.dispose();
     _notchController.dispose();
     super.dispose();
@@ -41,21 +39,93 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         backgroundColor: isOn ? Color(0xff0D1C2D) : Color(0xffF8F9FA),
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(
-              100,
-            ), // Mengatur kelengkungan sudut gambar
-            child: Image.asset("assets/images/logo.png", fit: BoxFit.cover),
-          ),
+        iconTheme: IconThemeData(
+          color: isOn ? const Color(0xff6BFB9A) : const Color(0xff041627),
         ),
+        // leading: Padding(
+        //   padding: const EdgeInsets.all(8.0),
+        //   child: ClipRRect(
+        //     borderRadius: BorderRadius.circular(
+        //       100,
+        //     ),
+        //     child: Image.asset("assets/images/logo.png", fit: BoxFit.cover),
+        //   ),
+        // ),
         actions: [
           Icon(
             Icons.notifications_active,
             color: isOn ? Color(0xff6BFB9A) : Color(0xff041627),
           ),
         ],
+      ),
+
+      drawer: Drawer(
+        backgroundColor: isOn ? const Color(0xff0D1C2D) : Colors.white,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: isOn ? const Color(0xff051424) : const Color(0xff1A2B3C),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(100),
+                    child: Image.asset(
+                      "assets/images/logo.png",
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        Icons.account_circle,
+                        size: 60,
+                        color: isOn ? Color(0xff6BFB9A) : Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Dukun Saldo User",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.home,
+                color: isOn ? Color(0xff6BFB9A) : Color(0xff041627),
+              ),
+              title: Text(
+                "Beranda",
+                style: TextStyle(color: isOn ? Colors.white : Colors.black87),
+              ),
+              onTap: () {
+                Navigator.pop(context); // Tutup drawer saat diklik
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.settings,
+                color: isOn ? Color(0xff6BFB9A) : Color(0xff041627),
+              ),
+              title: Text(
+                "Pengaturan",
+                style: TextStyle(color: isOn ? Colors.white : Colors.black87),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
       ),
 
       body: Column(
