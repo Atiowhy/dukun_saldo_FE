@@ -1,3 +1,4 @@
+import 'package:dukun_saldo/views/home.dart';
 import 'package:dukun_saldo/views/login.dart';
 import 'package:dukun_saldo/views/register.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
       routes: {
         Login.routeName: (context) => const Login(),
         Register.routeName: (context) => const Register(),
+        HomePage.routeName: (context) => const HomePage(),
       },
     );
   }

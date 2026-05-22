@@ -159,6 +159,17 @@ class _LoginState extends State<Login> {
                                         return AlertDialog(
                                           title: Text("Berhasil"),
                                           content: Text("Anda Berhasil Login"),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pushNamed(
+                                                  context,
+                                                  '/home',
+                                                );
+                                              },
+                                              child: Text("Lanjut"),
+                                            ),
+                                          ],
                                         );
                                       },
                                     );

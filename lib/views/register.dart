@@ -12,6 +12,8 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
 
+  bool _isChecked = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -170,6 +172,26 @@ class _RegisterState extends State<Register> {
                                 return null;
                               },
                             ),
+
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Checkbox(
+                                  value: _isChecked,
+                                  onChanged: (bool? newValue) {
+                                    setState(() {
+                                      _isChecked = newValue ?? false;
+                                    });
+                                  },
+                                ),
+                                Text(
+                                  _isChecked
+                                      ? 'Saya Setuju'
+                                      : "Saya Tidak Setuju",
+                                ),
+                              ],
+                            ),
+
                             SizedBox(height: 24),
 
                             SizedBox(
@@ -190,7 +212,20 @@ class _RegisterState extends State<Register> {
                                       builder: (BuildContext context) {
                                         return AlertDialog(
                                           title: Text("Berhasil"),
-                                          content: Text("Anda Berhasil Login"),
+                                          content: Text(
+                                            "Anda Berhasil Register",
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pushNamed(
+                                                  context,
+                                                  '/login',
+                                                );
+                                              },
+                                              child: Text("Lanjut"),
+                                            ),
+                                          ],
                                         );
                                       },
                                     );
