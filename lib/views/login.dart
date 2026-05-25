@@ -10,6 +10,9 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController cityController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -89,13 +92,15 @@ class _LoginState extends State<Login> {
                       child: Form(
                         key: _formKey,
                         child: Column(
-                          // mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // SizedBox(height: 10),
                             Text("Email"),
                             SizedBox(height: 10),
                             TextFormField(
+                              onChanged: (value) {
+                                setState(() {});
+                              },
+                              controller: emailController,
                               decoration: InputDecoration(
                                 filled: true,
                                 labelText: "Email",
@@ -116,9 +121,32 @@ class _LoginState extends State<Login> {
                               },
                             ),
                             SizedBox(height: 10),
+                            Text("Alamat"),
+                            SizedBox(height: 10),
+                            TextFormField(
+                              controller: cityController,
+                              decoration: InputDecoration(
+                                filled: true,
+                                labelText: "Alamat",
+                                prefixIcon: Icon(Icons.location_city),
+                                hintText: "Masukkan Alamat",
+                                fillColor: Color(0x0ff8f9fa),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Alamat tidak boleh kosong";
+                                }
+                                return null;
+                              },
+                            ),
+                            SizedBox(height: 10),
                             Text("Password"),
                             SizedBox(height: 10),
                             TextFormField(
+                              controller: passwordController,
                               decoration: InputDecoration(
                                 filled: true,
                                 labelText: "Password",
@@ -165,6 +193,13 @@ class _LoginState extends State<Login> {
                                                 Navigator.pushNamed(
                                                   context,
                                                   '/home',
+                                                  arguments: {
+                                                    "email":
+                                                        emailController.text,
+                                                    "city": cityController.text,
+                                                    "password":
+                                                        passwordController.text,
+                                                  },
                                                 );
                                               },
                                               child: Text("Lanjut"),

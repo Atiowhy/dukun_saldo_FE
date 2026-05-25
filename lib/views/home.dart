@@ -50,12 +50,18 @@ class _HomePageState extends State<HomePage> {
       const RecommendationPage(),
     ];
 
+    final Map<String, dynamic>? args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+    final String userEmail = args?['email'] ?? "Guest";
+    final String userCity = args?['city'] ?? "Anywhere";
+
     return Scaffold(
       backgroundColor: isOn ? const Color(0xff051424) : const Color(0xffF8F9FA),
 
       appBar: AppBar(
         title: Text(
-          "Belajar Model",
+          userEmail,
           style: TextStyle(
             color: isOn ? const Color(0xff6BFB9A) : const Color(0xff041627),
             fontWeight: FontWeight.bold,
@@ -104,8 +110,16 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    "Dukun Saldo User",
+                  Text(
+                    userEmail,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    userCity,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
