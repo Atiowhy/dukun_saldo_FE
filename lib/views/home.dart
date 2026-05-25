@@ -202,9 +202,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHomeContent() {
+    final Map<String, dynamic>? args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final String userEmail = args?['email'] ?? "Guest";
+    final String userCity = args?['city'] ?? "Anywhere";
     return SingleChildScrollView(
       child: Column(
         children: [
+          Text("Selamat Datang $userEmail dari $userCity"),
           // ── Kartu Saldo ──────────────────────────────────
           Container(
             padding: const EdgeInsets.all(24),
