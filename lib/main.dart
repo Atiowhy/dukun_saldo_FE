@@ -1,6 +1,7 @@
 import 'package:dukun_saldo/views/home.dart';
 import 'package:dukun_saldo/views/login.dart';
 import 'package:dukun_saldo/views/register.dart';
+import 'package:dukun_saldo/views/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Dukun Saldo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -35,9 +37,10 @@ class MyApp extends StatelessWidget {
       ),
 
       // home: Register(),
-      initialRoute: Login.routeName,
+      initialRoute: SplashScreen.routeName,
 
       routes: {
+        SplashScreen.routeName: (context) => const SplashScreen(),
         Login.routeName: (context) => const Login(),
         Register.routeName: (context) => const Register(),
         HomePage.routeName: (context) => const HomePage(),
