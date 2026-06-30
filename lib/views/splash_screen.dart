@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'login.dart';
+import 'home.dart';
 
 class SplashScreen extends StatefulWidget {
   static const String routeName = "/splash";
@@ -24,9 +26,37 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
     _controller.forward();
 
-    Timer(const Duration(seconds: 3), () {
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    await Future.delayed(const Duration(seconds: 3));
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+      if (!mounted) return;
+
+      if (isLoggedIn) {
+        final String email = prefs.getString('email') ?? "Guest";
+        final String city = prefs.getString('city') ?? "Anywhere";
+
+        Navigator.pushReplacementNamed(
+          context,
+          HomePage.routeName,
+          arguments: {
+            "email": email,
+            "city": city,
+          },
+        );
+      } else {
+        Navigator.pushReplacementNamed(context, Login.routeName);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      print("Error loading SharedPreferences: $e");
       Navigator.pushReplacementNamed(context, Login.routeName);
-    });
+    }
   }
 
   @override

@@ -2,10 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:dukun_saldo/models/product_models.dart';
 import 'package:dukun_saldo/service/api_services.dart';
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'advisor_page.dart';
 import 'detail_page.dart';
 import 'recomendation_page.dart';
+import 'login.dart';
 
 class HomePage extends StatefulWidget {
   static const String routeName = "/home";
@@ -20,6 +21,10 @@ class _HomePageState extends State<HomePage> {
   String? selectedDropdown;
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
+  String searchQuery = "";
+  Category? selectedCategory;
+  int currentPage = 1;
+  final int itemsPerPage = 8;
 
   // api
   late final ApiService _apiService;
@@ -91,6 +96,12 @@ class _HomePageState extends State<HomePage> {
             border: Border.all(color: textSecondary.withOpacity(0.1)),
           ),
           child: TextField(
+            onChanged: (value) {
+              setState(() {
+                searchQuery = value;
+                currentPage = 1; // Reset ke halaman pertama saat mencari
+              });
+            },
             style: TextStyle(color: textPrimary, fontSize: 14),
             decoration: InputDecoration(
               hintText: "Cari produk impianmu...",
@@ -121,7 +132,7 @@ class _HomePageState extends State<HomePage> {
                     shape: BoxShape.circle,
                   ),
                   child: const Text(
-                    "3",
+                    "2",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 10,
@@ -131,7 +142,9 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            onPressed: () {},
+            onPressed: () {
+              _onItemTapped(1);
+            },
           ),
           const SizedBox(width: 8),
         ],
@@ -264,6 +277,26 @@ class _HomePageState extends State<HomePage> {
             ),
             onTap: () => Navigator.pop(context),
           ),
+          ListTile(
+            leading: const Icon(Icons.logout, color: Colors.redAccent),
+            title: const Text(
+              "Keluar",
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            onTap: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove('isLoggedIn');
+              await prefs.remove('email');
+              await prefs.remove('city');
+
+              if (!mounted) return;
+
+              Navigator.pushReplacementNamed(context, Login.routeName);
+            },
+          ),
           const Spacer(),
           Divider(height: 1, color: textSecondary.withOpacity(0.2)),
           Padding(
@@ -358,7 +391,26 @@ class _HomePageState extends State<HomePage> {
             ),
           );
         } else if (snapshot.hasData) {
-          final products = snapshot.data!;
+          final allProducts = snapshot.data!;
+          final filteredProducts = allProducts.where((p) {
+            final matchesSearch =
+                searchQuery.isEmpty ||
+                p.title.toLowerCase().contains(searchQuery.toLowerCase());
+            final matchesCategory =
+                selectedCategory == null || p.category == selectedCategory;
+            return matchesSearch && matchesCategory;
+          }).toList();
+
+          final int totalPages = (filteredProducts.length / itemsPerPage)
+              .ceil();
+          final int startIndex = (currentPage - 1) * itemsPerPage;
+          final int endIndex = startIndex + itemsPerPage;
+          final products = filteredProducts.sublist(
+            startIndex,
+            endIndex > filteredProducts.length
+                ? filteredProducts.length
+                : endIndex,
+          );
           return RefreshIndicator(
             onRefresh: () async => _refresh(),
             color: primaryColor,
@@ -405,6 +457,42 @@ class _HomePageState extends State<HomePage> {
                       return _buildProductCard(product);
                     },
                   ),
+                  if (totalPages > 1)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back_ios, size: 16),
+                            onPressed: currentPage > 1
+                                ? () {
+                                    setState(() {
+                                      currentPage--;
+                                    });
+                                  }
+                                : null,
+                          ),
+                          Text(
+                            "Page $currentPage of $totalPages",
+                            style: TextStyle(
+                              color: textPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.arrow_forward_ios, size: 16),
+                            onPressed: currentPage < totalPages
+                                ? () {
+                                    setState(() {
+                                      currentPage++;
+                                    });
+                                  }
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ),
                   const SizedBox(height: 24),
                 ],
               ),
@@ -509,10 +597,27 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildCategories() {
     final List<Map<String, dynamic>> categories = [
-      {"name": "Elektronik", "icon": Icons.phone_iphone_rounded},
-      {"name": "Perhiasan", "icon": Icons.diamond_rounded},
-      {"name": "Pria", "icon": Icons.checkroom_rounded},
-      {"name": "Wanita", "icon": Icons.shopping_bag_rounded},
+      {"name": "Semua", "icon": Icons.category_rounded, "enum": null},
+      {
+        "name": "Elektronik",
+        "icon": Icons.phone_iphone_rounded,
+        "enum": Category.ELECTRONICS,
+      },
+      {
+        "name": "Perhiasan",
+        "icon": Icons.diamond_rounded,
+        "enum": Category.JEWELERY,
+      },
+      {
+        "name": "Pria",
+        "icon": Icons.checkroom_rounded,
+        "enum": Category.MEN_S_CLOTHING,
+      },
+      {
+        "name": "Wanita",
+        "icon": Icons.shopping_bag_rounded,
+        "enum": Category.WOMEN_S_CLOTHING,
+      },
     ];
 
     return SizedBox(
@@ -522,43 +627,54 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.symmetric(horizontal: 12),
         itemCount: categories.length,
         itemBuilder: (context, index) {
-          return Container(
-            width: 80,
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: surfaceColor,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(isOn ? 0.3 : 0.03),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+          final isSelected = selectedCategory == categories[index]["enum"];
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedCategory = categories[index]["enum"];
+                currentPage = 1; // Reset ke halaman pertama saat filter ganti
+              });
+            },
+            child: Container(
+              width: 80,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: isSelected ? primaryColor : surfaceColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(isOn ? 0.3 : 0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      categories[index]["icon"],
+                      color: isSelected ? Colors.white : primaryColor,
+                      size: 26,
+                    ),
                   ),
-                  child: Icon(
-                    categories[index]["icon"],
-                    color: primaryColor,
-                    size: 26,
+                  const SizedBox(height: 10),
+                  Text(
+                    categories[index]["name"],
+                    style: TextStyle(
+                      color: isSelected ? primaryColor : textSecondary,
+                      fontSize: 12,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  categories[index]["name"],
-                  style: TextStyle(
-                    color: textSecondary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },

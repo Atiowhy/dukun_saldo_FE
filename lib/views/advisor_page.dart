@@ -1,7 +1,26 @@
+import 'package:dio/dio.dart';
+import 'package:dukun_saldo/models/product_models.dart';
+import 'package:dukun_saldo/service/api_services.dart';
 import 'package:flutter/material.dart';
 
-class AdvisorPage extends StatelessWidget {
+class AdvisorPage extends StatefulWidget {
   const AdvisorPage({super.key});
+
+  @override
+  State<AdvisorPage> createState() => _AdvisorPageState();
+}
+
+class _AdvisorPageState extends State<AdvisorPage> {
+  late final ApiService _apiService;
+  late Future<List<PostModel>> _productFuture;
+  final Map<int, int> _quantities = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _apiService = ApiService(Dio());
+    _productFuture = _apiService.getAllProducts();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,24 +40,45 @@ class AdvisorPage extends StatelessWidget {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: 2, // Dummy count
-              itemBuilder: (context, index) {
-                return _buildCartItem(index);
-              },
-            ),
-          ),
-          _buildCheckoutBar(context),
-        ],
+      body: FutureBuilder<List<PostModel>>(
+        future: _productFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return const Center(child: Text("Gagal memuat data keranjang"));
+          } else if (snapshot.hasData) {
+            // Ambil 2 produk pertama sebagai dummy cart data dari API
+            final products = snapshot.data!.take(2).toList();
+            double total = products.fold(
+              0,
+              (sum, item) => sum + (item.price * (_quantities[item.id] ?? 1)),
+            );
+
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      return _buildCartItem(products[index]);
+                    },
+                  ),
+                ),
+                _buildCheckoutBar(context, total),
+              ],
+            );
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
 
-  Widget _buildCartItem(int index) {
+  Widget _buildCartItem(PostModel product) {
+    int quantity = _quantities[product.id] ?? 1;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
@@ -63,10 +103,17 @@ class AdvisorPage extends StatelessWidget {
               color: const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
-              Icons.image_outlined,
-              size: 40,
-              color: Colors.grey,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                product.image,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.image_not_supported,
+                  size: 40,
+                  color: Colors.grey,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -76,9 +123,7 @@ class AdvisorPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  index == 0
-                      ? "Fjallraven - Foldsack No. 1"
-                      : "Mens Casual Premium Slim Fit T-Shirts",
+                  product.title,
                   style: const TextStyle(
                     color: Color(0xFF0F172A),
                     fontWeight: FontWeight.bold,
@@ -89,7 +134,7 @@ class AdvisorPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  index == 0 ? "\$109.95" : "\$22.3",
+                  "\$${product.price.toStringAsFixed(2)}",
                   style: const TextStyle(
                     color: Color(0xFF2563EB),
                     fontWeight: FontWeight.bold,
@@ -107,17 +152,30 @@ class AdvisorPage extends StatelessWidget {
                   Icons.add_circle_outline,
                   color: Color(0xFF2563EB),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  setState(() {
+                    _quantities[product.id] = quantity + 1;
+                  });
+                },
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 padding: EdgeInsets.zero,
               ),
-              const Text("1", style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                "$quantity",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               IconButton(
                 icon: const Icon(
                   Icons.remove_circle_outline,
                   color: Colors.grey,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  if (quantity > 1) {
+                    setState(() {
+                      _quantities[product.id] = quantity - 1;
+                    });
+                  }
+                },
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 padding: EdgeInsets.zero,
               ),
@@ -128,7 +186,7 @@ class AdvisorPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCheckoutBar(BuildContext context) {
+  Widget _buildCheckoutBar(BuildContext context, double total) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       decoration: BoxDecoration(
@@ -148,14 +206,14 @@ class AdvisorPage extends StatelessWidget {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text(
+              children: [
+                const Text(
                   "Subtotal",
                   style: TextStyle(color: Colors.grey, fontSize: 14),
                 ),
                 Text(
-                  "\$132.25",
-                  style: TextStyle(
+                  "\$${total.toStringAsFixed(2)}",
+                  style: const TextStyle(
                     color: Color(0xFF0F172A),
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -166,8 +224,8 @@ class AdvisorPage extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text(
+              children: [
+                const Text(
                   "Total",
                   style: TextStyle(
                     color: Color(0xFF0F172A),
@@ -176,8 +234,8 @@ class AdvisorPage extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "\$132.25",
-                  style: TextStyle(
+                  "\$${total.toStringAsFixed(2)}",
+                  style: const TextStyle(
                     color: Color(0xFF2563EB),
                     fontWeight: FontWeight.bold,
                     fontSize: 24,
